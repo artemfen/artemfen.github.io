@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link href="favicon.png" rel="shortcut icon" type="image/png">
+	<title>Yandex blog</title>
+	 <meta charset="UTF-8">
+	 <link rel="stylesheet" type="text/css" href="style/global.css">
+     <link rel="stylesheet" type="text/css" href="style/load.css">
+</head>
+	<body bgcolor="white" Body style="margin-left: 7%; margin-right: 7%">
+<h1 align="center" style="color: gray; font-size: 50px"><b>Блог компании Yandex</b></h1>
+	<p align="center" style="background-color: gray; color: white"><b>ЯНДЕКС.ПОЧТА: КАК МЫ ИЗМЕРЯЕМ СКОРОСТЬ ЗАГРУЗКИ И УЛУЧШАЕМ ЕЁ</b></p>
+<div style="text-align: left;">
+	<p>Если ваш сайт медленно грузится, вы рискуете тем, что люди не оценят ни то,
+		какой он красивый, ни то, какой он удобный. Никому не понравится, когда все
+		тормозит. Мы регулярно добавляем в Яндекс.Почту новую функциональность,
+		иногда — исправляем ошибки, а это значит, у нас постоянно появляются новый код
+		и новая логика. Всё это напрямую влияет на скорость работы интерфейса.</p></div>
+	<h2 align="center" style="background-color: gray; color: white">Что мы измеряем</h2>
+<div style="margin-left: 35%">		
+		<ol <p> <u>Этапы первой загрузки:</u></p>
+		<li>  подготовка;</li>
+		<li>  загрузка статики (HTTP-запрос и парсинг);</li>
+		<li>  исполнение модулей;</li>
+		<li>  инициализация базовых объектов;</li>
+		<li>  отрисовка.</li>
+	</ol><br></div>
+	    <div style="margin-left: 35%">
+
+	<ol <p><u>Этапы отрисовки любой страницы:</u></p> 
+			<li>подготовка к запросу на сервер;</li>
+			<li>запрос данных с сервера;</li>
+			<li>шаблонизация;</li>
+			<li>обновление DOM.</li>
+		</ol><br>
+		</div>
+<div>
+		<blockquote>— «Ок, тепеь у нас есть метрики, мы можем отправить их на сервер» - говорим мы<br>
+
+				— «Что же дальше?» - вопрошаете вы<br>
+
+				— «А давай построим график!» - отвечаем мы<br>
+
+				— «А что будем считать?» - уточняете вы<br></blockquote></div>
+<div>
+		<p>Как вы знаете, медиана – это серединное, а не среднее значение в выборке.
+		Если у нас имеются числа 1, 2, 2, 3, 8, 10, 20, то медиана – 3, а среднее – 6,5.
+		В общем случае медиана отлично показывает, сколько грузится средний пользователь.
+		В случае ускорения или замедления медиана, конечно, изменится. Но она не может
+		рассказать, сколько пользователей ускорилось, а сколько замедлилось.</p></div>	
+<div>
+		<p><span><a href="https://en.wikipedia.org/wiki/Apdex">APDEX</a></span> – метрика, которая сразу говорит: хорошо или плохо.Метрика
+			работает очень просто. Мы выбираем временной интервал [0; t], такой, что если
+			время показа страницы попало в него, то пользователь счастлив.Берем еще один
+			интервал, (t; 4t] (в четыре раза больше первого), и считаем, что если страница
+			показана за это время, то пользователь в целом удовлетворен скоростью работы,
+			но уже не настолько счастлив.И применяем формулу:
+			 <div style="text-align: center;"><p><b>((кол-во счастливых пользователей) + (кол-во удовлетворенных) / 2) / (кол-во всех).</b></p></div>
+       		Получается значение от нуля до единицы, которое, видимо, лучше всего показывает,
+       		хорошо или плохо работает почта.</p></div>	
+	<h2 align="center" style="background-color: gray; color: white">Как мы измеряем</h2>
+<div>
+		<p>Сейчас модуль обновления сам логирует все свои стадии, и можно легко понять
+		причину замедления: медленнее стал отвечать сервер либо слишком долго
+		выполняется <span><a href="https://ru.wikipedia.org/wiki/JavaScript">JavaScript</a></span> Выглядит это примерно так:</p>
+		<p><div style="background-color: black; color: yellow; margin-left: 30%"><code>this.timings['look-ma-im-start'] = Date.now();<br>
+				this.timings['look-ma-finish'] = Date.now();
+				</div><br></code><br>И на сервер прилетают подобные записи:<br></p>
+			<p><div style="background-color: black; color: yellow; margin-left: 30%">
+			      <code >serverResponse=50&domUpdate=60</code>
+			    </div></p></div>	
+	<h2 align="center" style="background-color: gray; color: white">Как мы ускоряем</h2>
+<div>
+	    <ol><p style=" margin-left: 10%; font-size: 17px"><b>Чтобы снизить время загрузки почты при выходе новых версий,
+				мы уже делаем следующее:
+		</b></p>
+		<div  style="margin-left: 35%">
+		<li><u>включаем gzip;</li>
+		<li>выставляем заголовки кэширования;</li>
+		<li>фризим CSS, JS, шаблоны и картинки;</li>
+		<li>используем CDN</u></li>
+		</div>
+	</ol></div>
+<div>
+	<p>Мы подумали: «А что если хранить где-то старую версию файлов, а при выходе новой
+		передавать только diff между ней и той, которая сохранена у пользователя?»<br>
+		В браузере же останется просто наложить патч на клиенте.</p>
+	<p>На самое деле эта идея не нова. Уже существуют стандарты для HTTP — например,
+		RFC 3229 «Delta encoding in HTTP» и «Google SDHC», — но по разным причинам они<br>
+		не получили должного распространения в браузерах и на серверах.</p>
+	<p>Мы же решили сделать свой аналог на JS.<br> Чтобы реализовать этот метод обновления,
+		начали искать реализации diff на JS. На популярных хостингах кода нашли
+		библиотеки:<br>
+		<code>- VCDiff<br>
+		- google-diff-patch-match</code></p>
+		<p>Для окончательного выбора библиотеки нам нужно сравнить:</p>
+		<table style="margin-left: 30%; width: 30%"; border="4" > 
+		  <thead>   
+        <tr>
+            <th>Библиотека</th>
+            <th>IE 9</th>
+            <th>Opera 12</th>
+           </tr>   
+    	</thead> 
+        <tr><td>vcdiff</td><td>8</td><td>5</td></tr>
+        <tr><td>google diff</td><td>1363</td><td>76</td></tr>
+        </table> 
+		</div>	
+<div><p>После того как мы определились с библиотекой для диффа, нужно определиться с тем,
+		где и как хранить статику на клиенте.<br>
+		Формат файла с патчами для проекта выглядит так:<br>
+		<div style="background-color: black; color: yellow; margin-left: 30%">
+		<code>[<br>
+    	{<br>
+        "k": "jane.css",<br>
+        "p": [patch],<br>
+        "s": 4554<br>
+    },<br>
+    {<br>
+        "k": "jane.css",<br>
+        "p": [patch],<br>
+        "s": 4554<br>	
+    	}<br>
+	]</code></div><br>
+		</p>
+	</div>		
+<div>
+	<p>То есть это обычный массив из объектов. Каждый объект — отдельный ресурс.<br> У
+		каждого объекта есть три свойства.<br> k — названия ключа в localStorage для этого
+		ресурса.<br> p — патч для ресурса, который сгенерировал vcdiff.<br> s — чексумма для
+		ресурса актуальной версии, чтобы потом можно было проверить правильность
+		наложения патча на клиенте. <br>Чексумма вычисляется по алгоритму Флетчера.</p>
+	<p>Алгоритм Бройдена — Флетчера — Гольдфарба — Шанно (BFGS)<br>
+	    <br><img src="https://camo.githubusercontent.com/87655e52351caf112734f0d172ed084113d43a96/68747470733a2f2f696d672d666f746b692e79616e6465782e72752f6765742f31353438372f33323136373634382e302f305f3133333437665f33343966363138615f58354c" height="25%" width="45%" title="Алгоритм Бройдена — Флетчера — Гольдфарба — Шанно (BFGS)
+"><br>
+            		— итерационный метод численной оптимизации, предназначенный для
+		нахождения локального максимума/минимума нелинейного функционала
+		без ограничений.</p>
+
+		<p>Почему именно алгоритм Флетчера, а не другие популярные алгоритмы вроде:
+		CRC16/32 - алгоритм нахождения контрольной суммы, предназначенный для проверки
+		целостности данных
+		md5 - 128-битный алгоритм хеширования. Предназначен для создания «отпечатков»
+		или дайджестов сообщения произвольной длины и последующей проверки
+		их подлинности.Потому что он быстрый, компактный и легок в реализации.</p></div>
+<h2 align="center" style="background-color: gray; color: white">Итог</h2>		
+<div><p>Фактически мы экономим 80-90% трафика. Размер загружаемой статитки в байтах:</p>
+	<table style="margin-left: 40%; width: 30%"; border="4">
+		 <thead>   
+        <tr>
+            <th>Релиз</th>
+            <th>С патчем</th>
+            <th>Без патча</th>
+           </tr>   
+    	</thead> 
+        <tr><td>7.7.20</td><td>397</td><td>174 549</td></tr>
+        <tr><td>7.7.21</td><td>383</td><td>53 995</td></tr>
+        <tr> <td>7.7.22</td><td>483</td><td>3 995</td></tr>
+	</table></div><br>
+<div style="text-align: right;">
+	<p>Автор: @doochik<br>
+	С++ разработик<br>
+	<span>Электронная почта:<a href="mailto:doochik@yandex-team.ru">(doochik@yandex-team.ru)</a></span><br>
+	Компания: Яндекс</p></div>
+<div><p><h3>Комментарии(3):</h3></p>
+	<blockquote><p>- Mogaika <a href="mailto:mogaika@yandex-team.ru">(mogaika@yandex-team.ru)</a> 30 ноября 2014 в 17:05</p>
+  <p>А можете привести сравнение, на сколько быстрее грузится lite версия?</p><br>
+	<p>- JIguse <a href="mailto:mrawesome@yandex.ru">(mrawesome@yandex.ru)</a> 29 ноября 2014 в 21:30</p>
+  <p>Спасибо за статью, познавательно. Здорово, что Яндекс делится некоторыми
+  подробностями о внутренней работе сервисов.</p><br>
+	<p>- Brister <a href="mailto:brist89@yandex-team.ru">(brist89@yandex-team.ru)</a> 24 ноября 2014 в 13:13</p>
+  <p>(кол-во счастливых пользователей + кол-во удовлетворенных / 2) / (кол-во всех).
+  Получается значение от нуля до единицы, которое, видимо, лучше всего показывает,
+  хорошо или плохо работает почта.</p>
+  <p> наверное все-таки от 0.5 до 1</p><br>
+	<p><span>- alexeimois<a href="mailto:test@yandex.ru">(test@yandex.ru)</a>22 ноября 2014 в 17:35</span> 
+	<p><span>Мы измеряем скорость загрузки с помощью Яндекс.Метрики:<a href="https://help.yandex.ru/metrika/reports/monitoring_timing.xml">(help.yandex.ru/metrika/reports/monitoring_timing.xml)</a></span> 
+  	</p>
+	</blockquote>
+</div>	
+ <p>
+                                     <div style="background-color: gray;text-align: center; color: white">&#169; Яндекс, help@yandex.ru, Хохрякова, 10</p></div>
+<form action="#" method="post">
+    <div>
+          <label for="name">name</label>
+          <input id="name" name="title" type="text" placeholder="enter name">
+          <label style="display: block;">
+          	Name
+          	<input type="text" placeholder="enter name">
+          </label>
+      <input name="title" type="text" placeholder="enter name">
+      <input value="button" type="button">
+      <button type="submit">пипец</button>
+            <div style="height: 10px;"></div>
+      <div>
+      	<textarea rows="15" cols="15" style="width: 400px" placeholder="enter info">закоменть</textarea>
+            <div style="height: 10px;"></div>
+            <div>
+            	<label for="book">book</label>
+            	<select id="book">
+            		<option>1</option>
+            		<option selected>2</option>
+            	</select>
+            </div>
+      </div>
+      <div>
+      	<label for="check">chek</label>
+      	<input type="checkbox" checked>
+      	<label>
+      		check book
+      		<label><input name="mebook" type="radio" value="horror">ужасы</label>
+      		<label><input name="mebook" type="radio" value="comedy">комедия</label>
+            <label><input name="mebook" type="radio" value="drama">драма</label>
+      	</label>
+      </div>
+      <!DOCTYPE html>
+<html>
+<head>
+    <title>St.Anger</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="styles/style.css">
+    <style>
+    	html {
+    		color: blue;
+    	} 
+    	body {
+	background: green;
+}    
+    </style>
+</head>
+<body>
+<header style="background: blue">
+    <h1>HTML5Doctor.com</h1>
+</header>
+<nav style="background: #f0f0f0 ">
+    <ul>
+        <li>Nav Link</li>
+        <li>Nav Link</li>
+        <li>Nav Link</li>
+    </ul>
+</nav>
+<aside style="background: red;color: #fff;width: 300px;display: inline-block;vertical-align: top;">
+    <h2>Blogroll</h2>
+    <ul>
+        <li><a href="#">My Friend</a></li>
+        <li><a href="#">My Other Friend</a></li>
+        <li><a href="#">My Best Friend</a></li>
+    </ul>
+</aside>
+
+<main role="main" style="display: inline-block;width: 600px;vertical-align: top;">
+    <h1>Skateboards</h1>
+    <p>The skateboard is the way cool kids get around</p>
+    <article>
+        <h2>Longboards</h2>
+        <p>Longboards are a type of skateboard with a longer wheelbase and larger, softer wheels.</p>
+        <p>... </p>
+    </article>
+    <article>
+        <h2>Electric Skateboards</h2>
+        <p>These no longer require the propelling of the skateboard by means of the feet; rather an electric motor propels the board, fed by an electric battery.</p>
+        <p>... </p>
+    </article>
+    <section>
+       <h1>Съёмки фильма Полипропилен</h1>
+       <p>История о том, как снимали фильм, где герои отдыхали на пляже, 
+       потом пришёл антагонист, избил протагонистов, сбросил их в бассейн, 
+       и что из этого получилось.</p>
+    </section>
+</main>
+<footer style="background: #333;color: #fff">
+    © 2009 HTML5Doctor.com
+</footer>
+
+
+</body>
+</html>
+	</body>
+</html>
